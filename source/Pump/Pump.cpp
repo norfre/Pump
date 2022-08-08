@@ -5,6 +5,7 @@
 //PumpPin is the Arduino relay output pin number to be switched to start/stop the pump
 //TankLevelPin is the Arduino digital input pin number connected to the tank level switch
 //Interlockpin is the Arduino digital input number connected to an "interlock". 
+//PumpStopPin is the Arduino relay output pin number to be switched to stop the pump
 //If this input is LOW, pump is stopped and/or cannot start. This is used for instance to stop
 //the Orp or pH pumps in case filtration pump is not running
 //IsRunningSensorPin is the pin which is checked to know whether the pump is running or not. 
@@ -13,12 +14,13 @@
 //FlowRate is the flow rate of the pump in Liters/Hour, typically 1.5 or 3.0 L/hour for peristaltic pumps for pools. This is used to compute how much of the tank we have emptied out
 //TankVolume is used here to compute the percentage fill used
 Pump::Pump(uint8_t PumpPin, uint8_t IsRunningSensorPin, uint8_t TankLevelPin, 
-           uint8_t Interlockpin, double FlowRate, double TankVolume, double TankFill)
+           uint8_t Interlockpin, uint8_t PumpStopPin, double FlowRate, double TankVolume, double TankFill)
 {
   pumppin = PumpPin;
   isrunningsensorpin = IsRunningSensorPin;
   tanklevelpin = TankLevelPin;
   interlockpin = Interlockpin;
+  pumpstoppin = PumpStopPin;
   flowrate = FlowRate; //in Liters per hour
   tankvolume = TankVolume; //in Liters
   tankfill = TankFill; // in percent
@@ -64,6 +66,10 @@ bool Pump::Start()
     && ((interlockpin == NO_INTERLOCK) || (digitalRead(interlockpin) == INTERLOCK_OK)))    //if((digitalRead(pumppin) == false))
   {
     digitalWrite(pumppin, PUMP_ON);
+	if(pumpstoppin != NO_STOP_PIN)
+	{
+		digitalWrite(isrunningsensorpin, PUMP_ON);
+	}
     StartTime = LastStartTime = millis(); 
     return true; 
   }
@@ -76,6 +82,11 @@ bool Pump::Stop()
   if(digitalRead(isrunningsensorpin) == PUMP_ON)
   {
     digitalWrite(pumppin, PUMP_OFF);
+	if(pumpstoppin != NO_STOP_PIN)
+	{
+		digitalWrite(isrunningsensorpin, PUMP_OFF);
+		digitalWrite(pumpstoppin, PUMP_ON);
+	}
     UpTime += millis() - StartTime; 
     return true;
   }

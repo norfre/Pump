@@ -23,14 +23,15 @@ NB: all timings are in milliseconds
 #define INTERLOCK_NOK 0
 #define NO_LEVEL 170           // Pump with tank but without level switch
 #define NO_TANK 255            // Pump without tank
-#define NO_INTERLOCK 255  
+#define NO_INTERLOCK 255 
+#define NO_STOP_PIN 255 
 
 #define DefaultMaxUpTime 30*60*1000 //default value is 30mins  
  
 class Pump{
   public:
 
-    Pump(uint8_t, uint8_t, uint8_t = NO_TANK, uint8_t = NO_INTERLOCK, double = 0., double = 0., double =100.);    
+    Pump(uint8_t, uint8_t, uint8_t = NO_TANK, uint8_t = NO_INTERLOCK, uint8_t = NO_STOP_PIN, double = 0., double = 0., double =100.);    
     void loop();
     bool Start();
     bool Stop();
@@ -61,6 +62,7 @@ class Pump{
     uint8_t isrunningsensorpin;
     uint8_t tanklevelpin;
     uint8_t interlockpin;
+	uint8_t pumpstoppin;
 
 };
 #endif
